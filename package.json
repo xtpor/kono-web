@@ -1,0 +1,17 @@
+{
+  "name": "kono",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "Tintin Ho (holoktin97@gmail.com)",
+  "license": "MIT",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "craftyjs": "^0.7.1",
+    "underscore": "^1.8.3"
+  }
+}
