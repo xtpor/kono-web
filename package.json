@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "browserify src/main.js > bundle.js",
+    "watch": "watchify src/main.js -o bundle.js"
   },
   "keywords": [],
   "author": "Tintin Ho (holoktin97@gmail.com)",
@@ -13,5 +15,9 @@
     "chai": "^3.5.0",
     "craftyjs": "^0.7.1",
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "watchify": "^3.7.0"
   }
 }
