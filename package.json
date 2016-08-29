@@ -1,14 +1,18 @@
 {
   "name": "kono",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Korea board game",
   "main": "index.js",
+  "repository" : {
+      "type" : "git",
+      "url" : "https://github.com/xtpor97/kono.git"
+  },
   "scripts": {
     "test": "mocha",
     "build": "browserify src/main.js > bundle.js",
     "watch": "watchify src/main.js -o bundle.js"
   },
-  "keywords": [],
+  "keywords": ["board game"],
   "author": "Tintin Ho (holoktin97@gmail.com)",
   "license": "MIT",
   "dependencies": {
