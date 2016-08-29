@@ -8,7 +8,6 @@ var Kono = require('./kono');
 var res = require('./res');
 var layout = require('./layout');
 
-window.Crafty = Crafty; // DEBUG
 
 var config = {
     selfTile: 'red',
