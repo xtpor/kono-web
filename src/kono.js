@@ -81,9 +81,9 @@ var Game = module.exports = function (spec) {
     var board = _.times(4, function (x) {
         return _.times(4, function (y) {
             if (y < 2) {
-                return 'red';
-            } else {
                 return 'blue';
+            } else {
+                return 'red';
             }
         });
     });
