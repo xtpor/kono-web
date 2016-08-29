@@ -1,0 +1,21 @@
+
+body {
+    margin: 0px;
+    /* background-color: black; */
+}
+
+.centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@font-face {
+    font-family: 'grobedeutschmeister';
+    src: url('assets/fonts/grobe-deutschmeister.eot');
+    src: url('assets/fonts/grobe-deutschmeister.eot?#iefix') format('embedded-opentype'),
+         url('assets/fonts/grobe-deutschmeister.woff') format('woff'),
+         url('assets/fonts/grobe-deutschmeister.ttf') format('truetype'),
+         url('assets/fonts/grobe-deutschmeister.svg#grobedeutschmeister') format('svg');
+}
