@@ -5,6 +5,7 @@ var express = require('express');
 var socketio = require('socket.io');
 var _ = require('underscore');
 
+var showWebLog = false;
 var serverPort = 8000;
 var publicDir = __dirname + '/public';
 var mainPage = path.resolve(publicDir + '/index.html');
@@ -14,7 +15,9 @@ var server = app.listen(serverPort);
 var io = socketio.listen(server);
 
 app.use(function (req, res, next) {
-    console.log(req.ip, '=>', req.url);
+    if (showWebLog) {
+        console.log(req.ip, '=>', req.url);
+    }
     next();
 });
 
@@ -49,7 +52,8 @@ var matchmaking = function () {
             });
         });
 
-        console.log('Matched ' + first.nickname + ' vs ' + second.nickname);
+        console.log('Matched ' + first.nickname + '(' + first.tile + ')' +
+                    ' vs ' + second.nickname + '(' + second.tile + ')');
     }
 };
 
@@ -77,11 +81,14 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        if (socket.state === 'matching') {
+        if (socket.state === 'idling') {
+            /* nothing */
+        } else if (socket.state === 'matching') {
             queue.splice(queue.indexOf(socket), 1);
             console.log('Player ' + socket.nickname + ' exits the queue.');
-        }
-        if (socket.state !== 'idling') {
+            console.log('Player ' + socket.nickname + ' disconnected');
+        } else if (socket.state === 'playing') {
+            socket.oppsite.emit('leave');
             console.log('Player ' + socket.nickname + ' disconnected');
         }
     });

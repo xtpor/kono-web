@@ -22,19 +22,19 @@ var game = kono();
 var picked = null;
 
 
-var image = function (imageName) {
+var assets = function (imageName) {
     return 'assets/images/' + imageName + '.png';
 };
 
 var flashingImage = function (entity, imageName) {
     var emphasized = true;
     entity.requires('Image, Delay')
-        .image(image(imageName + 'Em'))
+        .image(assets(imageName + 'Em'))
         .delay(function () {
             if (emphasized) {
-                this.image(image(imageName + 'Em'));
+                this.image(assets(imageName + 'Em'));
             } else {
-                this.image(image(imageName));
+                this.image(assets(imageName));
             }
             emphasized = !emphasized;
         }, 400, -1);
@@ -43,7 +43,7 @@ var flashingImage = function (entity, imageName) {
 var renderAll = function (memo) {
     memo.enemyIcon = Crafty.e("2D, DOM, Image")
         .attr(layout.enemyIcon)
-        .image(image(gamemeta.enemyTile + 'Icon'));
+        .image(assets(gamemeta.enemyTile + 'Icon'));
 
     memo.enemyName = Crafty.e("2D, DOM, Text")
         .attr(layout.enemyName)
@@ -52,7 +52,7 @@ var renderAll = function (memo) {
 
     memo.selfIcon = Crafty.e("2D, DOM, Image")
         .attr(layout.selfIcon)
-        .image(image(gamemeta.selfTile + 'Icon'));
+        .image(assets(gamemeta.selfTile + 'Icon'));
 
     memo.selfName = Crafty.e("2D, DOM, Text")
         .attr(layout.selfName)
@@ -62,16 +62,22 @@ var renderAll = function (memo) {
 
     memo.board = Crafty.e("2D, DOM, Image")
         .attr(layout.board)
-        .image(image('board'));
+        .image(assets('board'));
 
     _.times(4, function (i) {
         _.times(4, function (j) {
             var tile = game.at({x: i, y: j});
-            memo[i + ',' + j] = Crafty.e("2D, DOM, Image")
+            memo[i + ',' + j] = Crafty.e("2D, DOM, Image, Mouse, Delay")
                 .attr(layout['grid:' + i + ',' + j])
-                .image(image(tile + 'Tile'));
+                .image(assets(tile + 'Tile'));
         });
     });
+
+    if (gamemeta.selfTile === game.current) {
+        flashingImage(memo.selfIcon, gamemeta.selfTile + 'Icon');
+    } else {
+        flashingImage(memo.enemyIcon, gamemeta.enemyTile + 'Icon');
+    }
 };
 
 var renderPanel = function (entities) {
@@ -79,19 +85,11 @@ var renderPanel = function (entities) {
         .attr(layout.panel)
         .image('assets/images/panel.png');
 
-    entities.message = Crafty.e("2D, DOM, Text, Delay")
+    entities.message = Crafty.e("2D, DOM, Text, Keyboard, Delay")
         .attr(layout.panelText)
         .text('')
         .textFont({size: '50px', family: 'grobedeutschmeister'})
         .css({'text-align': 'center'});
-};
-
-var flashingIcon = function (entities) {
-    if (gamemeta.selfTile === game.current) {
-        flashingImage(entities.selfIcon, gamemeta.selfTile + 'Icon');
-    } else {
-        flashingImage(entities.enemyIcon, gamemeta.enemyTile + 'Icon');
-    }
 };
 
 var sceneDispatch = function () {
@@ -103,10 +101,23 @@ var sceneDispatch = function () {
     }
 };
 
+var resetAll = function () {
+    gamemeta = {
+        selfTile: '',
+        selfName: '',
+        enemyTile: '',
+        enemyName: '',
+    };
+    game = kono();
+    picked = null;
+    socket.io.disconnect();
+    socket.io.connect();
+};
+
 Crafty.scene('disconnected', function () {
     var entities = {};
     renderPanel(entities);
-    entities.message.text('connecting');
+    entities.message.text('connecting ...');
 });
 
 Crafty.scene('naming', function () {
@@ -114,7 +125,7 @@ Crafty.scene('naming', function () {
     var name = '';
     var entities = {};
     renderPanel(entities);
-    entities.message.requires('Keyboard')
+    entities.message
         .text("What's your name")
         .bind('KeyDown', function (e) {
             var key = keysTable[e.key];
@@ -138,48 +149,42 @@ Crafty.scene('naming', function () {
 Crafty.scene('matching', function () {
     var entities = {};
     renderPanel(entities);
-    entities.message.text('connecting');
+    entities.message.text('matching ...');
 });
 
 Crafty.scene('pickFirst', function () {
     var entities = {};
     renderAll(entities);
-    flashingIcon(entities);
+    if (gamemeta.enemyTile === game.current) return;
 
-    if (gamemeta.selfTile === game.current) {
-        _.each(game.listActions(), function (action) {
-            var tileEntity = entities[action.from.x + ',' + action.from.y];
-            flashingImage(tileEntity, game.at(action.from) + 'Tile');
-            tileEntity.requires('Mouse')
-                .bind('Click', function () {
-                    picked = action.from;
-                    Crafty.scene('pickSecond');
-                });
-        });
-    }
+    _.each(game.listActions(), function (action) {
+        var tileEntity = entities[action.from.x + ',' + action.from.y]
+            .bind('Click', function () {
+                picked = action.from;
+                Crafty.scene('pickSecond');
+            });
+        flashingImage(tileEntity, game.at(action.from) + 'Tile');
+    });
 });
 
 Crafty.scene('pickSecond', function () {
     var entities = {};
     renderAll(entities);
-    flashingIcon(entities);
 
     _.each(game.listActions(), function (action) {
         if (_.isEqual(picked, action.from)) {
-            var tileEntity = entities[action.to.x + ',' + action.to.y];
-            flashingImage(tileEntity, game.at(action.to) + 'Tile');
-            tileEntity.requires('Mouse')
+            var tileEntity = entities[action.to.x + ',' + action.to.y]
                 .bind('Click', function () {
                     game.act(action);
                     socket.emit('action', action);
                     sceneDispatch();
                 });
+            flashingImage(tileEntity, game.at(action.to) + 'Tile');
         }
     });
 
-    var pickedEntity = entities[picked.x + ',' + picked.y];
-    pickedEntity.requires('Mouse')
-        .image(image(game.at(picked) + 'TileEm'))
+    entities[picked.x + ',' + picked.y]
+        .image(assets(game.at(picked) + 'TileEm'))
         .bind('Click', function () {
             picked = null;
             Crafty.scene('pickFirst');
@@ -189,35 +194,29 @@ Crafty.scene('pickSecond', function () {
 Crafty.scene('gameover', function () {
     var entities = {};
     renderAll(entities);
-
-    Crafty.e("2D, DOM, Image")
-        .attr(layout.panel)
-        .image('assets/images/panel.png');
-
-    var message;
+    renderPanel(entities);
 
     if (gamemeta.selfTile === game.result) {
-        message = gamemeta.selfName + ' wins';
+        entities.message.text(gamemeta.selfName + ' wins');
     } else {
-        message = gamemeta.enemyName + ' wins';
+        entities.message.text(gamemeta.enemyName + ' wins');
     }
 
-    Crafty.e("2D, DOM, Text, Delay")
-        .attr(layout.panelText)
-        .text(message)
-        .textFont({size: '50px', family: 'grobedeutschmeister'})
-        .css({'text-align': 'center'})
-        .delay(function () {
-            game = kono();
-            picked = null;
-            Crafty.scene('pickFirst');
-        }, 5000);
+    entities.message.delay(resetAll, 4000);
+});
+
+Crafty.scene('interrupted', function () {
+    var entities = {};
+    renderAll(entities);
+    renderPanel(entities);
+    entities.message
+        .text(gamemeta.enemyName + ' disconnects.')
+        .delay(resetAll, 3000);
 });
 
 Crafty.load(res, function () {
     Crafty.init(1024, 768, 'stage');
     Crafty.scene('disconnected');
-
     socket = client();
 
     socket.on('connect', function () {
@@ -226,12 +225,18 @@ Crafty.load(res, function () {
 
     socket.on('start', function (payload) {
         gamemeta = payload;
-        sceneDispatch();
+        Crafty.scene('pickFirst');
     });
 
     socket.on('action', function (payload) {
         game.act(payload);
         sceneDispatch();
+    });
+
+    socket.on('leave', function () {
+        if (!game.result) {
+            Crafty.scene('interrupted');
+        }
     });
 
     socket.on('disconnect', function () {
