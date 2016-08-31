@@ -2,7 +2,7 @@
 
 Kono is a traditional Korea board game. Its rules can be found [here](https://en.wikipedia.org/wiki/Four_Field_Kono).
 
-![Screenshot](https://github.com/xtpor97/kono/screenshot/1.png)
+![Screenshot](https://raw.githubusercontent.com/xtpor97/kono/dev-multiplayer/screenshot/1.png)
 
 ## Getting Started
 - Clone this repo `git clone https://github.com/xtpor97/kono.git`
