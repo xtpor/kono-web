@@ -2,26 +2,33 @@
   "name": "kono",
   "version": "0.1.0",
   "description": "Korea board game",
-  "main": "index.js",
-  "repository" : {
-      "type" : "git",
-      "url" : "https://github.com/xtpor97/kono.git"
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xtpor97/kono.git"
   },
   "scripts": {
     "test": "mocha",
-    "build": "browserify src/main.js > bundle.js",
-    "watch": "watchify src/main.js -o bundle.js"
+    "start": "npm run build && node .",
+    "build": "browserify client.js > public/bundle.js",
+    "watch": "watchify client.js -o public/bundle.js",
+    "dev": "nodemon --watch src --watch client.js --watch server.js --exec npm start"
   },
-  "keywords": ["board game"],
+  "keywords": [
+    "board game"
+  ],
   "author": "Tintin Ho (holoktin97@gmail.com)",
   "license": "MIT",
   "dependencies": {
     "chai": "^3.5.0",
     "craftyjs": "^0.7.1",
+    "express": "^4.14.0",
+    "socket.io": "^1.4.8",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
+    "nodemon": "^1.10.2",
     "watchify": "^3.7.0"
   }
 }
