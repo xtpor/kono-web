@@ -1,11 +1,13 @@
-## Kono
+## Multiplayer Kono
 
 Kono is a traditional Korea board game. Its rules can be found [here](https://en.wikipedia.org/wiki/Four_Field_Kono).
 
+![Screenshot](https://raw.githubusercontent.com/xtpor97/kono/dev-multiplayer/screenshot/1.png)
+
 ## Getting Started
 - Clone this repo `git clone https://github.com/xtpor97/kono.git`
-- `npm install && npm run build`
-- open `index.html` in your browser
+- `npm install && npm start`
+- open `localhost:8000` in your browser
 
 ## Licensing
 
