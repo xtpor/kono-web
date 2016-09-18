@@ -22,6 +22,13 @@ var game = kono();
 var picked = null;
 
 
+var randomName = function () {
+    var randomChar = function () {
+        return "abcdefghijklmnopqrstuvwxyz"[_.random(0, 25)].toUpperCase();
+    };
+    return _.times(5, randomChar).join('');
+};
+
 var assets = function (imageName) {
     return 'assets/images/' + imageName + '.png';
 };
@@ -81,7 +88,7 @@ var renderAll = function (memo) {
 };
 
 var renderPanel = function (entities) {
-    entities.panel = Crafty.e("2D, DOM, Image")
+    entities.panel = Crafty.e("2D, DOM, Mouse, Image")
         .attr(layout.panel)
         .image('assets/images/panel.png');
 
@@ -144,6 +151,11 @@ Crafty.scene('naming', function () {
                 Crafty.scene('matching');
             }
         });
+
+    entities.panel.bind('MouseUp', function () {
+        socket.emit('queueup', {nickname: 'Player ' + randomName()});
+        Crafty.scene('matching');
+    });
 });
 
 Crafty.scene('matching', function () {
@@ -159,7 +171,7 @@ Crafty.scene('pickFirst', function () {
 
     _.each(game.listActions(), function (action) {
         var tileEntity = entities[action.from.x + ',' + action.from.y]
-            .bind('Click', function () {
+            .bind('MouseUp', function () {
                 picked = action.from;
                 Crafty.scene('pickSecond');
             });
@@ -174,7 +186,7 @@ Crafty.scene('pickSecond', function () {
     _.each(game.listActions(), function (action) {
         if (_.isEqual(picked, action.from)) {
             var tileEntity = entities[action.to.x + ',' + action.to.y]
-                .bind('Click', function () {
+                .bind('MouseUp', function () {
                     game.act(action);
                     socket.emit('action', action);
                     sceneDispatch();
@@ -185,7 +197,7 @@ Crafty.scene('pickSecond', function () {
 
     entities[picked.x + ',' + picked.y]
         .image(assets(game.at(picked) + 'TileEm'))
-        .bind('Click', function () {
+        .bind('MouseUp', function () {
             picked = null;
             Crafty.scene('pickFirst');
         });
@@ -215,6 +227,12 @@ Crafty.scene('interrupted', function () {
 });
 
 Crafty.load(res, function () {
+    var width = 1024;
+    var height = 768;
+
+    window.onresize = function () {
+    };
+
     Crafty.init(1024, 768, 'stage');
     Crafty.scene('disconnected');
     socket = client();
