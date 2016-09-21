@@ -5,8 +5,8 @@ var express = require('express');
 var socketio = require('socket.io');
 var _ = require('underscore');
 
-var showWebLog = false;
-var serverPort = 8000;
+var showWebLog = true;
+var serverPort = 8080;
 var publicDir = __dirname + '/public';
 var mainPage = path.resolve(publicDir + '/index.html');
 
